@@ -1,0 +1,12 @@
+streamlit
+langchain
+langchain-community
+langchain-huggingface
+faiss-cpu
+lxml
+sentence-transformers
+torch
+transformers
+accelerate
+langchain-text-splitters
+huggingface_hub

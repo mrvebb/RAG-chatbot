@@ -1,0 +1,40 @@
+
+Başlık: Retrieval-Augmented Generation (RAG) Mimarisine Kapsamlı Bir Bakış
+
+Giriş: Retrieval-Augmented Generation (RAG) Nedir?
+Retrieval-Augmented Generation (RAG), Büyük Dil Modellerinin (LLM) yeteneklerini, model dışı harici bir bilgi tabanından dinamik olarak bilgi alarak zenginleştiren bir yapay zeka mimarisidir. Geleneksel LLM'ler, yalnızca eğitim verilerinde bulunan statik bilgilere güvenirler. Bu durum, modellerin güncel olaylardan habersiz olmasına veya "halüsinasyon" olarak bilinen, olgusal olarak yanlış veya uydurma yanıtlar üretmesine yol açabilir. RAG, bu sorunu çözmek için LLM'e bir "açık kitap sınavı" yeteneği verir; model, bir yanıt üretmeden önce harici ve güvenilir kaynaklara başvurur.
+
+RAG Mimarisi Nasıl Çalışır? Temel Süreç Akışı
+RAG süreci temelde iki ana aşamadan oluşur: Geri Getirme (Retrieval) ve Oluşturma (Generation).
+
+1. Geri Getirme (Retrieval) Aşaması:
+Bir kullanıcı sorgusu sisteme ulaştığında, bu sorgu öncelikle bir "Retriever" (Geri Getirici) bileşenine yönlendirilir. Bu bileşen, sorguyu alır ve harici bir bilgi kaynağında (Knowledge Base) ilgili bilgileri arar. Bu harici kaynak genellikle bir vektör veritabanıdır. Sorgu ile en alakalı olan belge parçaları (chunk) bulunur ve "bağlam" (context) olarak toplanır.
+
+2. Oluşturma (Generation) Aşaması:
+Sistemin ilk aşamada bulduğu bu ilgili belge parçaları (bağlam), kullanıcının orijinal sorgusuyla birleştirilerek tek bir "zenginleştirilmiş" komut (augmented prompt) haline getirilir. Bu zenginleştirilmiş komut, yanıtı oluşturması için Büyük Dil Modeli'ne (LLM - örneğin Gemini, GPT) gönderilir. LLM, cevabını uydurmak yerine, kendisine sağlanan bu spesifik bağlama dayalı olarak olgusal tutarlılığı yüksek bir yanıt üretir.
+
+RAG'ın Ana Bileşenleri Nelerdir?
+
+Bir RAG sistemi üç ana bileşenden oluşur:
+
+1. İndeksleme (Indexing): Bu, RAG'ın hazırlık aşamasıdır. Harici belgeler (PDF'ler, metin dosyaları, web sayfaları) önce "chunk" adı verilen daha küçük, yönetilebilir parçalara bölünür. Daha sonra, bir "Embedding Modeli" (örn: Google, Cohere, open-source modeller) bu metin parçalarının her birini anlamsal içeriğini temsil eden sayısal vektörlere dönüştürür. Bu vektörler, hızlı arama için optimize edilmiş özel bir veritabanı olan "Vektör Veritabanı"nda (örn: FAISS, Chroma, Pinecone) saklanır.
+
+2. Geri Getirme (Retrieval): Kullanıcı bir sorgu gönderdiğinde, bu sorgu da aynı embedding modeli kullanılarak bir vektöre dönüştürülür. Retriever, bu sorgu vektörünü vektör veritabanındaki tüm belge vektörleriyle karşılaştırır (genellikle kosinüs benzerliği gibi bir metrik kullanarak) ve anlamsal olarak en çok benzeyen "en iyi K" (top-K) adet belge parçasını geri getirir.
+
+3. Oluşturma (Generation): Bu aşama, LLM'in (Generator) devreye girdiği yerdir. Geri getirilen "en iyi K" adet belge parçası, LLM'in bağlam penceresine sığacak şekilde düzenlenir ve orijinal sorgu ile birleştirilir. LLM, bu bağlamı kullanarak nihai, tutarlı ve olgusal yanıtı formüle eder.
+
+RAG Kullanmanın Başlıca Avantajları
+
+RAG mimarisi, geleneksel LLM'lere göre birçok kritik avantaj sunar:
+- Artan Doğruluk ve Azalan Halüsinasyon: Yanıtlar, dışarıdan sağlanan doğrulanabilir gerçeklere dayandığı için modelin yanlış bilgi üretme olasılığı önemli ölçüde azalır.
+- Güncel Bilgi Erişimi: LLM'ler, eğitim verilerinin kesildiği tarihten (knowledge cut-off) sonraki bilgilere erişemez. RAG, bilgi tabanını (vektör veritabanı) sürekli güncel tutarak modelin en yeni bilgilere bile erişmesini sağlar.
+- Maliyet Etkinliği: Bir LLM'i yeni bilgilerle (fine-tuning) sürekli yeniden eğitmek son derece maliyetli ve yavaştır. RAG, yeni bilgiyi veritabanına ekleyerek bu maliyeti ortadan kaldırır.
+- Güvenilirlik ve Kaynak Gösterme: Model bir yanıt verdiğinde, bu yanıtı hangi belgenin hangi bölümüne dayanarak ürettiğini göstermek (kaynak göstermek) mümkün hale gelir. Bu, özellikle kurumsal veya akademik kullanım için kritik öneme sahiptir.
+- Alan Adına Özgü Bilgi: RAG, bir şirketin kendi özel belgeleri, teknik kılavuzları veya yasal dokümanları gibi alan adına özgü bilgilerle beslenebilir.
+
+RAG Mimarisi Türleri
+
+RAG sistemleri basitlikten karmaşıklığa doğru evrilmiştir:
+1. Naive RAG (Basit RAG): Yukarıda açıklanan temel "İndeksle, Geri Getir, Oluştur" akışını takip eden standart yaklaşımdır.
+2. Advanced RAG (Gelişmiş RAG): Bu yaklaşım, sürecin çeşitli aşamalarını optimize eder. Örneğin, "Pre-retrieval" (geri getirme öncesi) aşamasında indeksleme stratejilerini (chunk optimizasyonu gibi) veya "Post-retrieval" (geri getirme sonrası) aşamasında getirilen belgeleri yeniden sıralamak (Re-ranking) için ek modeller kullanmayı içerir.
+3. Modular RAG (Modüler RAG): RAG akışını daha esnek modüllere ayıran bir yaklaşımdır. Örneğin, sorguyu daha iyi hale getirmek için bir "sorgu dönüştürme" modülü ekleyebilir veya birden fazla kaynaktan (hem web araması hem de vektör veritabanı) bilgi alabilen karma (hybrid) bir arama modülü kullanabilir.
